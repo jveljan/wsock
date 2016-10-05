@@ -41,8 +41,10 @@ public class WebSocketConfig implements WebSocketConfigurer {
             WsockHandler connections = new WsockHandler(objectMapper);
             WsockServiceImpl wsockService = new WsockServiceImpl(connections);
             SpringSoHandler handler = new SpringSoHandler(connections);
-            WsockConfig cfg = new WsockConfig();
+
             wsInit.init(wsockService);
+
+            WsockConfig cfg = new WsockConfig();
             Consumer<WsockConfig> configurator = wsockService.getConfigurator();
             if(configurator != null) {
                 configurator.accept(cfg);
@@ -56,7 +58,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
                 registration.addInterceptors(interceptor);
             }
             if(cfg.getAllowedOrigins() != null) {
-                cfg.setAllowedOrigins(cfg.getAllowedOrigins());
+                registration.setAllowedOrigins(cfg.getAllowedOrigins());
             }
             log.debug("Registered WebSocket for {} on path={}", wsInit, wsAnnotation.value());
         });
