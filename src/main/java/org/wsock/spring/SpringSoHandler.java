@@ -2,23 +2,22 @@ package org.wsock.spring;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.wsock.internal.TokenUtil;
 import org.wsock.pub.Wsock;
-import org.wsock.internal.SoConnections;
-import org.wsock.internal.SoEvent;
-import org.wsock.internal.SoEventType;
+import org.wsock.internal.WsockHandler;
+import org.wsock.internal.WsockEvent;
+import org.wsock.internal.WsockEventType;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.wsock.internal.SoEventType.EVENT;
+import static org.wsock.internal.WsockEventType.EVENT;
 
 
 /**
@@ -26,23 +25,15 @@ import static org.wsock.internal.SoEventType.EVENT;
  */
 public class SpringSoHandler extends TextWebSocketHandler {
 
-    private SoConnections soConnections;
+    private WsockHandler wsockHandler;
 
-    public SpringSoHandler(SoConnections soConnections) {
-        this.soConnections = soConnections;
+    public SpringSoHandler(WsockHandler wsockHandler) {
+        this.wsockHandler = wsockHandler;
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        MultiValueMap<String, String> params = UriComponentsBuilder.fromUri(session.getUri()).build().getQueryParams();
-        final String token = params.getFirst("token");
-        if(token == null) {
-            session.sendMessage(soEventToMessage(SoEvent.create(SoEventType.ERROR, "", "Invalid token")));
-            session.close(CloseStatus.BAD_DATA);
-            return;
-        }
-        //TODO: duplicate token
-        //TODO: ask services to accept this token
+        final String token = TokenUtil.extactToken(session.getUri());;
 
         final Wsock wsock = new Wsock() {
             private ConcurrentHashMap<String, Object> sessionData = new ConcurrentHashMap<>();
@@ -53,8 +44,8 @@ public class SpringSoHandler extends TextWebSocketHandler {
             }
 
             @Override
-            public void send(SoEventType type, String channel, Object data) {
-                SoEvent event = SoEvent.create(type, channel, data);
+            public void send(WsockEventType type, String channel, Object data) {
+                final WsockEvent event = WsockEvent.create(type, channel, data);
                 try {
                     session.sendMessage(soEventToMessage(event));
                 } catch (IOException e) {
@@ -73,24 +64,24 @@ public class SpringSoHandler extends TextWebSocketHandler {
             }
         };
         session.getAttributes().put(Wsock.class.getName(), wsock);
-        soConnections.onConnect(wsock);
+        wsockHandler.onConnect(wsock);
     }
 
-    private WebSocketMessage<?> soEventToMessage(SoEvent e) throws JsonProcessingException {
-        return new TextMessage( soConnections.stringify(e) );
+    private WebSocketMessage<?> soEventToMessage(WsockEvent e) throws JsonProcessingException {
+        return new TextMessage( wsockHandler.stringify(e) );
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         Wsock wsock = (Wsock) session.getAttributes().get(Wsock.class.getName());
-        soConnections.onDisconnect(wsock);
+        wsockHandler.onDisconnect(wsock);
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         Wsock wsock = (Wsock) session.getAttributes().get(Wsock.class.getName());
         try {
-            soConnections.handleTextMessage(wsock, message.getPayload());
+            wsockHandler.handleTextMessage(wsock, message.getPayload());
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -6,10 +6,22 @@ The simplest websocket procotol I could come up for easy and pubsub-ish / req-re
 
 Message exchange is always in json (*)
 
+Client sends in this format:
 ```javascript
 {
-  path: "/"
-  data: {}
+  path: string    => similar as request path, eg. /chat/info
+  data: any       => object data
+  messageId: long => id to track response (optional)
+}
+```
+
+Server sends in similar format:
+```javascript
+{
+  id: long        => event id
+  channel: string => similar as path, /chat/message
+  data: any       => object data
+  type: EventType => id to track response
 }
 ```
 

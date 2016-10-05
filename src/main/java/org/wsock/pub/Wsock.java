@@ -1,7 +1,7 @@
 package org.wsock.pub;
 
 
-import org.wsock.internal.SoEventType;
+import org.wsock.internal.WsockEventType;
 
 import java.util.Map;
 
@@ -19,7 +19,7 @@ public interface Wsock {
     /**
      * Sends an event
      */
-    void send(SoEventType type, String channel, Object data);
+    void send(WsockEventType type, String channel, Object data);
 
     /**
      * sends type EVENT

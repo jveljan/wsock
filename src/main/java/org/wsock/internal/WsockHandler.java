@@ -3,14 +3,12 @@ package org.wsock.internal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.xml.internal.bind.v2.TODO;
 import net.jodah.typetools.TypeResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.wsock.pub.Wsock;
 
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -23,17 +21,17 @@ import java.util.function.Function;
 /**
  * Created by joco on 02.10.16.
  */
-public class SoConnections {
+public class WsockHandler {
     private static final String NULL_BUCKET_KEY = "@NULL";
-    private static final Logger log = LoggerFactory.getLogger(SoConnections.class);
+    private static final Logger log = LoggerFactory.getLogger(WsockHandler.class);
     private ThreadLocal<Wsock> soSessionThreadLocal = new ThreadLocal<>();
     private Map<String, List<Wsock>> sessionBuckets = new ConcurrentHashMap<>();
 
-    private SoHandlerRegistry registry = new SoHandlerRegistry();
+    private WsockRegistry registry = new WsockRegistry();
     private ObjectMapper objectMapper;
 
     @Autowired
-    public SoConnections(ObjectMapper objectMapper) {
+    public WsockHandler(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
@@ -54,12 +52,12 @@ public class SoConnections {
         }
     }
 
-    public Object onMessage(Wsock session, SoEvent message) {
+    public Object onMessage(Wsock session, WsockEvent message) {
         log.debug("Socket message on channel: {} ", message.getChannel());
 
         final Function fn = registry.getHandler(message.getChannel());
 
-        final BiConsumer<Wsock, SoEvent> onMessageCb = registry.getOnMessageCallback();
+        final BiConsumer<Wsock, WsockEvent> onMessageCb = registry.getOnMessageCallback();
         if(onMessageCb != null) {
             try {
                 onMessageCb.accept(session, message);
@@ -89,7 +87,7 @@ public class SoConnections {
                 soSessionThreadLocal.remove();
             }
         } else {
-            final BiConsumer<Wsock, SoEvent> unhandledMessageCallback = registry.getOnUnhandledMessageCallback();
+            final BiConsumer<Wsock, WsockEvent> unhandledMessageCallback = registry.getOnUnhandledMessageCallback();
             if(unhandledMessageCallback != null) {
                 try {
                     unhandledMessageCallback.accept(session, message);
@@ -162,7 +160,7 @@ public class SoConnections {
             return;
         }
         Req req = parse(payload, Req.class);
-        SoEvent e = SoEvent.create(SoEventType.REQ, req.path, req.data);
+        WsockEvent e = WsockEvent.create(WsockEventType.REQ, req.path, req.data);
         Object resp = this.onMessage(wsock, e);
         if(resp != null) {
             //TODO: what if clientId is null ? ...
@@ -170,9 +168,9 @@ public class SoConnections {
 
             String respChannel = req.path + (req.clientId != null ? "#" + req.clientId : "");
             if(resp instanceof Exception) {
-                wsock.send(SoEventType.ERROR, respChannel, new RespErrorMessage((Exception) resp));
+                wsock.send(WsockEventType.ERROR, respChannel, new RespErrorMessage((Exception) resp));
             } else {
-                wsock.send(SoEventType.RESP, respChannel, resp);
+                wsock.send(WsockEventType.RESP, respChannel, resp);
             }
         }
     }
@@ -186,7 +184,7 @@ public class SoConnections {
         return objectMapper.readValue(str, type);
     }
 
-    public SoHandlerRegistry getRegistry() {
+    public WsockRegistry getRegistry() {
         return registry;
     }
 }

@@ -1,7 +1,7 @@
 package org.wsock.pub;
 
 
-import org.wsock.internal.SoEvent;
+import org.wsock.internal.WsockEvent;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -25,12 +25,12 @@ public interface WsockService {
     /**
      * onMessage event
      */
-    void onMessage(BiConsumer<Wsock, SoEvent> onMessageCallback);
+    void onMessage(BiConsumer<Wsock, WsockEvent> onMessageCallback);
 
     /**
      * onMessage but only if there is no handler for that event
      */
-    void onUnhandledMessage(BiConsumer<Wsock, SoEvent> onMessageCallback);
+    void onUnhandledMessage(BiConsumer<Wsock, WsockEvent> onMessageCallback);
 
     /**
      * Extracted event data on path listener
@@ -50,4 +50,19 @@ public interface WsockService {
      * @return Current Session
      */
     Wsock current();
+
+    /**
+     * Register this to accept/reject tokens from establishing socket connection
+     * (if not set, all tokens will be accepted)
+     *
+     * @param tokenAcceptor
+     */
+    void tokenAcceptor(Function<String, Boolean> tokenAcceptor);
+
+    /**
+     * Modify default configuration
+     *
+     * @param configurator
+     */
+    void configuration(Consumer<WsockConfig> configurator);
 }

@@ -5,13 +5,13 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by joco on 02.10.16.
  */
-public class SoEvent {
+public class WsockEvent {
     private long id;
-    private SoEventType type;
+    private WsockEventType type;
     private String channel;
     private Object data;
 
-    private SoEvent(long id, SoEventType type, String channel, Object data) {
+    private WsockEvent(long id, WsockEventType type, String channel, Object data) {
         this.id = id;
         this.type = type;
         this.channel = channel;
@@ -26,11 +26,11 @@ public class SoEvent {
         this.id = id;
     }
 
-    public SoEventType getType() {
+    public WsockEventType getType() {
         return type;
     }
 
-    public void setType(SoEventType type) {
+    public void setType(WsockEventType type) {
         this.type = type;
     }
 
@@ -52,7 +52,7 @@ public class SoEvent {
 
     private static final AtomicLong idgen = new AtomicLong(0);
 
-    public static SoEvent create(SoEventType type, String channel, Object data) {
-        return new SoEvent(idgen.incrementAndGet(), type, channel, data);
+    public static WsockEvent create(WsockEventType type, String channel, Object data) {
+        return new WsockEvent(idgen.incrementAndGet(), type, channel, data);
     }
 }

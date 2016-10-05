@@ -1,26 +1,27 @@
-package org.wsock.todo;
+package org.wsock.internal;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Created by joco on 01.10.16.
  */
-class SessionAcceptInjector implements HandshakeInterceptor {
+public class SessionAcceptInterceptor implements HandshakeInterceptor {
+    private final Function<String, Boolean> tokenAcceptor;
+
+    public SessionAcceptInterceptor(Function<String, Boolean> tokenAcceptor) {
+        this.tokenAcceptor = tokenAcceptor;
+    }
+
     @Override
     public boolean beforeHandshake(ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse, WebSocketHandler webSocketHandler, Map<String, Object> map) throws Exception {
-        MultiValueMap<String, String> params = UriComponentsBuilder.fromHttpRequest(serverHttpRequest).build().getQueryParams();
-        String token = params.getFirst("token");
-        System.out.println("SessionAcceptInjector beforeHandshake ... " + token);
-        // TODO: token acceptance service
-
-        return true;
+        final String token = TokenUtil.extactToken(serverHttpRequest);
+        return tokenAcceptor.apply(token);
     }
 
     @Override
