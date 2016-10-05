@@ -1,0 +1,10 @@
+{
+  "pingMessage": {
+    "path": "/ping",
+    "data": {}
+  },
+  "chatMessage": {
+    "path": "/chat/message",
+    "data": "hello there"
+  }
+}
