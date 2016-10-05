@@ -18,6 +18,8 @@ jar {
 	baseName = 'wsock'
 	version = '0.0.1-SNAPSHOT'
 }
+
+bootRepackage.enabled = false
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
