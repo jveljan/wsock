@@ -1,9 +1,9 @@
-package org.wsock.internal;
+package org.wsock.internal.model;
 
 /**
  * Created by joco on 03.10.16.
  */
-class RespErrorMessage {
+public class RespErrorMessage {
     private String message;
     private String error;
     public RespErrorMessage(Exception resp) {

@@ -1,6 +1,7 @@
 package org.wsock.internal;
 
 
+import org.wsock.internal.model.ServerEvent;
 import org.wsock.pub.WsockConfig;
 import org.wsock.pub.WsockService;
 import org.wsock.pub.Wsock;
@@ -32,12 +33,12 @@ public class WsockServiceImpl implements WsockService {
     }
 
     @Override
-    public void onMessage(BiConsumer<Wsock, WsockEvent> onMessageCallback) {
+    public void onMessage(BiConsumer<Wsock, ServerEvent> onMessageCallback) {
         wsockHandler.getRegistry().setOnMessageCallback(onMessageCallback);
     }
 
     @Override
-    public void onUnhandledMessage(BiConsumer<Wsock, WsockEvent> onMessageCallback) {
+    public void onUnhandledMessage(BiConsumer<Wsock, ServerEvent> onMessageCallback) {
         wsockHandler.getRegistry().setOnUnhandledMessageCallback(onMessageCallback);
     }
 

@@ -1,7 +1,7 @@
 package org.wsock.pub;
 
 
-import org.wsock.internal.WsockEventType;
+import org.wsock.internal.model.WsockEventType;
 
 import java.util.Map;
 

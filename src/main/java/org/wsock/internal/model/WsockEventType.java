@@ -1,4 +1,4 @@
-package org.wsock.internal;
+package org.wsock.internal.model;
 
 /**
  * Created by joco on 02.10.16.

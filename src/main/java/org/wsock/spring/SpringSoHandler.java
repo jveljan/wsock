@@ -10,14 +10,14 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.wsock.internal.TokenUtil;
 import org.wsock.pub.Wsock;
 import org.wsock.internal.WsockHandler;
-import org.wsock.internal.WsockEvent;
-import org.wsock.internal.WsockEventType;
+import org.wsock.internal.model.ServerEvent;
+import org.wsock.internal.model.WsockEventType;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.wsock.internal.WsockEventType.EVENT;
+import static org.wsock.internal.model.WsockEventType.EVENT;
 
 
 /**
@@ -45,7 +45,7 @@ public class SpringSoHandler extends TextWebSocketHandler {
 
             @Override
             public void send(WsockEventType type, String channel, Object data) {
-                final WsockEvent event = WsockEvent.create(type, channel, data);
+                final ServerEvent event = ServerEvent.create(type, channel, data);
                 try {
                     session.sendMessage(soEventToMessage(event));
                 } catch (IOException e) {
@@ -67,7 +67,7 @@ public class SpringSoHandler extends TextWebSocketHandler {
         wsockHandler.onConnect(wsock);
     }
 
-    private WebSocketMessage<?> soEventToMessage(WsockEvent e) throws JsonProcessingException {
+    private WebSocketMessage<?> soEventToMessage(ServerEvent e) throws JsonProcessingException {
         return new TextMessage( wsockHandler.stringify(e) );
     }
 

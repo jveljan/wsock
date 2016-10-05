@@ -1,7 +1,7 @@
 package org.wsock.pub;
 
 
-import org.wsock.internal.WsockEvent;
+import org.wsock.internal.model.ServerEvent;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -25,12 +25,12 @@ public interface WsockService {
     /**
      * onMessage event
      */
-    void onMessage(BiConsumer<Wsock, WsockEvent> onMessageCallback);
+    void onMessage(BiConsumer<Wsock, ServerEvent> onMessageCallback);
 
     /**
      * onMessage but only if there is no handler for that event
      */
-    void onUnhandledMessage(BiConsumer<Wsock, WsockEvent> onMessageCallback);
+    void onUnhandledMessage(BiConsumer<Wsock, ServerEvent> onMessageCallback);
 
     /**
      * Extracted event data on path listener

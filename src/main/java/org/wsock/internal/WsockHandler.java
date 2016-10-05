@@ -7,13 +7,14 @@ import net.jodah.typetools.TypeResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.wsock.internal.model.ClientEvent;
+import org.wsock.internal.model.RespErrorMessage;
+import org.wsock.internal.model.ServerEvent;
+import org.wsock.internal.model.WsockEventType;
 import org.wsock.pub.Wsock;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -52,12 +53,12 @@ public class WsockHandler {
         }
     }
 
-    public Object onMessage(Wsock session, WsockEvent message) {
+    public Object onMessage(Wsock session, ServerEvent message) {
         log.debug("Socket message on channel: {} ", message.getChannel());
 
         final Function fn = registry.getHandler(message.getChannel());
 
-        final BiConsumer<Wsock, WsockEvent> onMessageCb = registry.getOnMessageCallback();
+        final BiConsumer<Wsock, ServerEvent> onMessageCb = registry.getOnMessageCallback();
         if(onMessageCb != null) {
             try {
                 onMessageCb.accept(session, message);
@@ -87,7 +88,7 @@ public class WsockHandler {
                 soSessionThreadLocal.remove();
             }
         } else {
-            final BiConsumer<Wsock, WsockEvent> unhandledMessageCallback = registry.getOnUnhandledMessageCallback();
+            final BiConsumer<Wsock, ServerEvent> unhandledMessageCallback = registry.getOnUnhandledMessageCallback();
             if(unhandledMessageCallback != null) {
                 try {
                     unhandledMessageCallback.accept(session, message);
@@ -145,34 +146,34 @@ public class WsockHandler {
 
 
 
-    static class Req {
-        public String path;
-        public Object data;
-
-        // TODO: this needs better name
-        // it its response identifier for the listener
-        public String clientId;
-    }
 
     public void handleTextMessage(Wsock wsock, String payload) throws IOException {
         if(payload == null || payload.startsWith("$")) {
             //TODO: handle special messages, eg. $heartbeat
             return;
         }
-        Req req = parse(payload, Req.class);
-        WsockEvent e = WsockEvent.create(WsockEventType.REQ, req.path, req.data);
+        ClientEvent clientEvent = parse(payload, ClientEvent.class);
+        //TODO: maybe we need some kind of intermediate data structure here
+        ServerEvent e = ServerEvent.create(WsockEventType.REQ, clientEvent.getPath(), clientEvent.getData());
         Object resp = this.onMessage(wsock, e);
         if(resp != null) {
-            //TODO: what if clientId is null ? ...
-            // just send back req.path if no clientId provided ...
-
-            String respChannel = req.path + (req.clientId != null ? "#" + req.clientId : "");
+            final String respChannel = getRespChannel(clientEvent);
             if(resp instanceof Exception) {
                 wsock.send(WsockEventType.ERROR, respChannel, new RespErrorMessage((Exception) resp));
             } else {
                 wsock.send(WsockEventType.RESP, respChannel, resp);
             }
         }
+    }
+
+    private String getRespChannel(ClientEvent clientEvent) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(clientEvent.getPath());
+        if(clientEvent.getMessageId() != null) {
+            sb.append("#");
+            sb.append(clientEvent.getMessageId());
+        }
+        return sb.toString();
     }
 
 

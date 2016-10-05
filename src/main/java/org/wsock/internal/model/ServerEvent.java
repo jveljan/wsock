@@ -1,17 +1,17 @@
-package org.wsock.internal;
+package org.wsock.internal.model;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by joco on 02.10.16.
  */
-public class WsockEvent {
+public class ServerEvent {
     private long id;
     private WsockEventType type;
     private String channel;
     private Object data;
 
-    private WsockEvent(long id, WsockEventType type, String channel, Object data) {
+    private ServerEvent(long id, WsockEventType type, String channel, Object data) {
         this.id = id;
         this.type = type;
         this.channel = channel;
@@ -52,7 +52,7 @@ public class WsockEvent {
 
     private static final AtomicLong idgen = new AtomicLong(0);
 
-    public static WsockEvent create(WsockEventType type, String channel, Object data) {
-        return new WsockEvent(idgen.incrementAndGet(), type, channel, data);
+    public static ServerEvent create(WsockEventType type, String channel, Object data) {
+        return new ServerEvent(idgen.incrementAndGet(), type, channel, data);
     }
 }

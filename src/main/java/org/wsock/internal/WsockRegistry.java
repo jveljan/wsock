@@ -2,6 +2,7 @@ package org.wsock.internal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wsock.internal.model.ServerEvent;
 import org.wsock.pub.Wsock;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,8 +19,8 @@ public class WsockRegistry {
     private ConcurrentHashMap<String, Function> handlersMap = new ConcurrentHashMap<>();
     private Function<Wsock, String> connectCallback;
     private Consumer<Wsock> disconnectCallback;
-    private BiConsumer<Wsock, WsockEvent> onMessageCallback;
-    private BiConsumer<Wsock, WsockEvent> onUnhandledMessageCallback;
+    private BiConsumer<Wsock, ServerEvent> onMessageCallback;
+    private BiConsumer<Wsock, ServerEvent> onUnhandledMessageCallback;
 
 
     public <I> void addHandler(String path, Function<I, ?> handler) {
@@ -40,7 +41,7 @@ public class WsockRegistry {
         this.disconnectCallback = disconnectCallback;
     }
 
-    public void setOnMessageCallback(BiConsumer<Wsock, WsockEvent> onMessageCallback) {
+    public void setOnMessageCallback(BiConsumer<Wsock, ServerEvent> onMessageCallback) {
         this.onMessageCallback = onMessageCallback;
     }
 
@@ -52,14 +53,14 @@ public class WsockRegistry {
         return disconnectCallback;
     }
 
-    public BiConsumer<Wsock, WsockEvent> getOnMessageCallback() {
+    public BiConsumer<Wsock, ServerEvent> getOnMessageCallback() {
         return onMessageCallback;
     }
 
-    public void setOnUnhandledMessageCallback(BiConsumer<Wsock, WsockEvent> onUnhandledMessageCallback) {
+    public void setOnUnhandledMessageCallback(BiConsumer<Wsock, ServerEvent> onUnhandledMessageCallback) {
         this.onUnhandledMessageCallback = onUnhandledMessageCallback;
     }
-    public BiConsumer<Wsock, WsockEvent> getOnUnhandledMessageCallback() {
+    public BiConsumer<Wsock, ServerEvent> getOnUnhandledMessageCallback() {
         return onUnhandledMessageCallback;
     }
 }

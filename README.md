@@ -1,6 +1,6 @@
 # Wsock
 
-The simplest websocket procotol I could come up for easy and pubsub-ish / req-resp way communication between browser (HTML5 WebSocket) and Java (spring boot)
+The simplest websocket procotol I could come up for easy and pubsub-ish / clientEvent-resp way communication between browser (HTML5 WebSocket) and Java (spring boot)
 
 # Protocol
 
