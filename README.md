@@ -57,16 +57,19 @@ Messages are automaticaly converted and routed to provided handlers...
 
 
 # Client
+
+import wsock.js
 ```javascript
+var ws = new Wsock('/wsock/endpoint');
+ws.connect(function() {
+  ws.send('/ping', function(resp) {
+    console.log(resp); // pong
+  });
 
-ws.send('/ping', function(resp) {
-  console.log(resp); // pong
+  ws.send('/chat/message', 'hello');
+
+  ws.on('/char/on/message', function(msg) {
+    // ... on message
+  });
 });
-
-ws.send('/chat/message', 'hello');
-
-ws.on('/char/on/message', function(msg) {
-});
-
 ```
-
